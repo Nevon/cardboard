@@ -7,9 +7,6 @@ Card = Class{function(self, id)
 	self.height = 107
 	self.x = math.random(0, 1125)
 	self.y = math.random(0, 590)
-	local suit
-	local color
-	local name
 
 	if id<13 then self.suit = "spades"
 	elseif id < 26 then self.suit = "clubs"
@@ -143,10 +140,6 @@ function love.load()
 		local toMove = math.random(i)
 		deck[toMove], deck[i] = deck[i], deck[toMove]
 	end
-end
-
-function love.update(dt)
-
 end
 
 function love.draw()
