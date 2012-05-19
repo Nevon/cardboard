@@ -11,9 +11,6 @@ Card = Class{function(self, id)
 	self.height = 107
 	self.x = math.random(0, 1125)
 	self.y = math.random(0, 590)
-	local suit
-	local color
-	local name
 
 	if id<13 then self.suit = "spades"
 	elseif id < 26 then self.suit = "clubs"
@@ -33,7 +30,7 @@ Card = Class{function(self, id)
 end}
 
 function Card:draw()
-	love.graphics.draw(self.image, self.x, self.y);
+	love.graphics.draw(self.image, self.x, self.y)
 end
 
 function Card:moved(x, y, remote)
@@ -281,6 +278,17 @@ function love.draw()
 	for i,v in ipairs(deck) do
 		v:draw()
 	end
+
+	if selected then
+		x,y = love.mouse.getPosition()
+		x = math.ceil(x-75/2)
+		y = math.ceil(y-107/2)
+		love.graphics.setColor(94,167,214, 177)
+		love.graphics.rectangle('fill', x, y, 75, 107)
+		love.graphics.setColor(157,190,250, 255)
+		love.graphics.rectangle('line', x-1, y-1, 76, 108)
+		love.graphics.setColor(255,255,255,255)
+	end
 end
 
 function love.mousepressed(x, y, button)
@@ -294,7 +302,7 @@ end
 
 function love.mousereleased(x, y, button)
 	if selected then
-		deck[selected]:moved(x,y)
+		deck[selected]:moved(math.ceil(x-deck[selected].width/2),math.ceil(y-deck[selected].height/2))
 		selected = false
 	end
 end
