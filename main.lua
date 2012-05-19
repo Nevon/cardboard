@@ -194,7 +194,7 @@ local function prepareNetwork(args)
 	if server then
 		conn = lube.tcpServer()
 		conn.handshake = "helloCardboard"
-		conn:setPing(true, 6, "areYouStillThere?")
+		conn:setPing(true, 16, "areYouStillThere?\n")
 		conn:listen(3410)
 		conn.callbacks.recv = serverRecv
 		conn.callbacks.connect = function() numConnected = numConnected + 1 end
@@ -207,7 +207,7 @@ local function prepareNetwork(args)
 		end
 		conn = lube.tcpClient()
 		conn.handshake = "helloCardboard"
-		conn:setPing(true, 2, "areYouStillThere?")
+		conn:setPing(true, 2, "areYouStillThere?\n")
 		assert(conn:connect(host, 3410, true))
 		conn.callbacks.recv = clientRecv
 	end
