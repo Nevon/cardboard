@@ -11,6 +11,7 @@ Card = Class{function(self, id)
 	self.height = 107
 	self.x = math.random(0, 1125)
 	self.y = math.random(0, 590)
+	self.flipped = false
 
 	if id<13 then self.suit = "spades"
 	elseif id < 26 then self.suit = "clubs"
@@ -30,7 +31,11 @@ Card = Class{function(self, id)
 end}
 
 function Card:draw()
-	love.graphics.draw(self.image, self.x, self.y)
+	if not self.flipped then
+		love.graphics.draw(self.image, self.x, self.y)
+	else
+		love.graphics.draw(back, self.x, self.y)
+	end
 end
 
 function Card:moved(x, y, remote)
@@ -66,6 +71,10 @@ function Card:clicked(x, y)
 	else
 		return false
 	end
+end
+
+function Card:flip()
+	self.flipped = not self.flipped
 end
 
 function ripairs(t)
@@ -251,6 +260,7 @@ function love.load(args)
 	math.random()
 	
 	bg = love.graphics.newImage('images/felt.png')
+	back = love.graphics.newImage('images/cards/back.png')
 	selected = false
 	--Initialize deck
 	deck = {}
@@ -294,7 +304,11 @@ end
 function love.mousepressed(x, y, button)
 	for i,v in ripairs(deck) do
 		if v:clicked(x, y) then
-			selected = i
+			if button == 'l' then
+				selected = i
+			elseif button == 'r' then
+				v:flip()
+			end
 			break
 		end
 	end
