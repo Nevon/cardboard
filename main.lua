@@ -139,19 +139,6 @@ do
     end
 end
 
-local function serverRecv(data, clientid)
-	data = data:match("^(.-)\n*$")
-	if data == "getDeck" then
-		for i = 1, #deck do
-			conn:send(
-				("%d:%d:%d:%d\n"):format(deck[i].id, deck[i].x, deck[i].y, deck[i].flipped and 1 or 0),
-				clientid)
-		end
-	else
-		return clientRecv(data)
-	end
-end
-
 local function clientRecv(data)
 	data = data:match("^(.-)\n*$")
 	if data:match("^moved:") then
@@ -175,6 +162,19 @@ local function clientRecv(data)
 				break
 			end
 		end
+	end
+end
+
+local function serverRecv(data, clientid)
+	data = data:match("^(.-)\n*$")
+	if data == "getDeck" then
+		for i = 1, #deck do
+			conn:send(
+				("%d:%d:%d:%d\n"):format(deck[i].id, deck[i].x, deck[i].y, deck[i].flipped and 1 or 0),
+				clientid)
+		end
+	else
+		return clientRecv(data)
 	end
 end
 
