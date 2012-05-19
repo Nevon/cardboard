@@ -58,7 +58,7 @@ function Card:moved(x, y, remote)
 	table.insert(deck, thisCard)
 
 	if not remote then
-		conn:send(("moved:%d:%d:%d"):format(self.id, x, y))
+		conn:send(("moved:%d:%d:%d\n"):format(self.id, x, y))
 	end
 end
 
@@ -75,6 +75,8 @@ end
 
 function Card:flip()
 	self.flipped = not self.flipped
+	
+	conn:send(("flipped:%d:%d\n"):format(self.id, self.flipped and 1 or 0))
 end
 
 function ripairs(t)
@@ -137,10 +139,11 @@ do
 end
 
 local function serverRecv(data, clientid)
+	data = data:match("^(.-)\n*$")
 	if data == "getDeck" then
 		for i = 1, #deck do
 			conn:send(
-				("%d:%d:%d\n"):format(deck[i].id, deck[i].x, deck[i].y),
+				("%d:%d:%d:%d\n"):format(deck[i].id, deck[i].x, deck[i].y, deck[i].flipped and 1 or 0),
 				clientid)
 		end
 	elseif data:match("^moved:") then
@@ -153,10 +156,22 @@ local function serverRecv(data, clientid)
 				break
 			end
 		end
+	elseif data:match("^flipped:") then
+		local id, flipped = data:match("^flipped:(%d+):(%d)$")
+		assert(id, "Invalid message")
+		id = tonumber(id)
+		flipped = (flipped == "1")
+		for i, v in ipairs(deck) do
+			if v.id == id then
+				v.flipped = flipped
+				break
+			end
+		end
 	end
 end
 
 local function clientRecv(data)
+	data = data:match("^(.-)\n*$")
 	if data:match("^moved:") then
 		local id, x, y = data:match("^moved:(%d+):(%d+):(%d+)$")
 		assert(id, "Invalid message")
@@ -164,6 +179,17 @@ local function clientRecv(data)
 		for i, v in ipairs(deck) do
 			if v.id == id then
 				v:moved(x, y, true)
+				break
+			end
+		end
+	elseif data:match("^flipped:") then
+		local id, flipped = data:match("^flipped:(%d+):(%d)$")
+		assert(id, "Invalid message")
+		id = tonumber(id)
+		flipped = (flipped == "1")
+		for i, v in ipairs(deck) do
+			if v.id == id then
+				v.flipped = flipped
 				break
 			end
 		end
@@ -235,20 +261,22 @@ local function prepareDeck()
 			deck[toMove], deck[i] = deck[i], deck[toMove]
 		end
 	else
-		local msg, line, id, x, y
+		local msg, line, id, x, y, flipped
 		conn:send("getDeck")
 		for i = 1, #deck do
 			repeat
 				local line = getLine()
-				id, x, y = line:match("(%d+):(%d+):(%d+)")
+				id, x, y, flipped = line:match("(%d+):(%d+):(%d+):(%d)")
 				if not id then
 					clientRecv(msg)
 				end
 			until id and x and y
 			id, x, y = tonumber(id), tonumber(x), tonumber(y)
+			flipped = (flipped == "1")
 			deck[i]:construct(id)
 			deck[i].x, deck[i].y = x, y
-			id, x, y = nil, nil, nil
+			deck[i].flipped = flipped
+			id, x, y, flipped = nil, nil, nil, nil
 		end
 	end
 end
