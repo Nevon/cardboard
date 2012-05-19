@@ -6,9 +6,11 @@ A simple, networked card moving application made for prototyping card games. The
 That said, it should allow two people to move cards around on a board, flip them over, etc.
 
 The game is hard coded to use port 3410, and you need [LÖVE](http://love2d.org) to play it. To launch (from within the game directory):
+
 	love .
 
 To connect as a client:
+
 	love . <IP adress>
 
 Sounds from here:
