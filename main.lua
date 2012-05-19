@@ -38,6 +38,8 @@ function Card:moved(x,y)
 	self.x = x
 	self.y = y
 
+	love.audio.play('sounds/place.ogg')
+
 	--Move 
 	local thisCard
 	for i,v in ipairs(deck) do
@@ -78,6 +80,48 @@ function ripairs(t)
   return ripairs_it, t, max
 end
 
+do
+    -- will hold the currently playing sources
+    local sources = {}
+
+    -- check for sources that finished playing and remove them
+    -- add to love.update
+    function love.audio.update()
+        local remove = {}
+        for _,s in pairs(sources) do
+            if s:isStopped() then
+                remove[#remove + 1] = s
+            end
+        end
+
+        for i,s in ipairs(remove) do
+            sources[s] = nil
+        end
+    end
+
+    -- overwrite love.audio.play to create and register source if needed
+    local play = love.audio.play
+    function love.audio.play(what, how, loop)
+        local src = what
+        if type(what) ~= "userdata" or not what:typeOf("Source") then
+            src = love.audio.newSource(what, how)
+            src:setLooping(loop or false)
+        end
+
+        play(src)
+        sources[src] = src
+        return src
+    end
+
+    -- stops a source
+    local stop = love.audio.stop
+    function love.audio.stop(src)
+        if not src then return end
+        stop(src)
+        sources[src] = nil
+    end
+end
+
 function love.load()
 	math.randomseed(os.time())
 	math.random()
@@ -92,13 +136,13 @@ function love.load()
 		deck[i+1] = Card(i)
 	end
 
+	love.audio.play('sounds/shuffle.ogg')
+
 	--Shuffle the shit out of it
 	for i=#deck, 1, -1 do
 		local toMove = math.random(i)
 		deck[toMove], deck[i] = deck[i], deck[toMove]
 	end
-
-	deck[6]:moved(500, 300)
 end
 
 function love.update(dt)
@@ -111,10 +155,6 @@ function love.draw()
 	for i,v in ipairs(deck) do
 		v:draw();
 	end
-
-	love.graphics.setColor(255,0,0,255)
-	love.graphics.rectangle('fill', 500, 300, 10, 10)
-	love.graphics.setColor(255,255,255,255)
 end
 
 function love.mousepressed(x, y, button)
