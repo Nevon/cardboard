@@ -142,7 +142,7 @@ end
 local function clientRecv(data)
 	data = data:match("^(.-)\n*$")
 	if data:match("^moved:") then
-		local id, x, y = data:match("^moved:(%d+):(%d+):(%d+)$")
+		local id, x, y = data:match("^moved:(%d+):(%d+):(%d+)")
 		assert(id, "Invalid message")
 		id, x, y = tonumber(id), tonumber(x), tonumber(y)
 		for i, v in ipairs(deck) do
@@ -152,7 +152,7 @@ local function clientRecv(data)
 			end
 		end
 	elseif data:match("^flipped:") then
-		local id, flipped = data:match("^flipped:(%d+):(%d)$")
+		local id, flipped = data:match("^flipped:(%d+):(%d)")
 		assert(id, "Invalid message")
 		id = tonumber(id)
 		flipped = (flipped == "1")
@@ -167,7 +167,7 @@ end
 
 local function serverRecv(data, clientid)
 	data = data:match("^(.-)\n*$")
-	if data == "getDeck" then
+	if data:match("^getDeck") then
 		for i = 1, #deck do
 			conn:send(
 				("%d:%d:%d:%d\n"):format(deck[i].id, deck[i].x, deck[i].y, deck[i].flipped and 1 or 0),
@@ -248,7 +248,7 @@ local function prepareDeck()
 		end
 	else
 		local msg, line, id, x, y, flipped
-		conn:send("getDeck")
+		conn:send("getDeck\n")
 		for i = 1, #deck do
 			repeat
 				local line = getLine()
