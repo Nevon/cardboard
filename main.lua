@@ -3,6 +3,7 @@ require "lib.LUBE"
 
 local server = true
 local conn
+local numConnected = 0
 
 Card = Class{function(self, id)
 	self.id = id
@@ -146,27 +147,8 @@ local function serverRecv(data, clientid)
 				("%d:%d:%d:%d\n"):format(deck[i].id, deck[i].x, deck[i].y, deck[i].flipped and 1 or 0),
 				clientid)
 		end
-	elseif data:match("^moved:") then
-		local id, x, y = data:match("^moved:(%d+):(%d+):(%d+)$")
-		assert(id, "Invalid message")
-		id, x, y = tonumber(id), tonumber(x), tonumber(y)
-		for i, v in ipairs(deck) do
-			if v.id == id then
-				v:moved(x, y, true)
-				break
-			end
-		end
-	elseif data:match("^flipped:") then
-		local id, flipped = data:match("^flipped:(%d+):(%d)$")
-		assert(id, "Invalid message")
-		id = tonumber(id)
-		flipped = (flipped == "1")
-		for i, v in ipairs(deck) do
-			if v.id == id then
-				v.flipped = flipped
-				break
-			end
-		end
+	else
+		return clientRecv(data)
 	end
 end
 
@@ -212,8 +194,11 @@ local function prepareNetwork(args)
 	if server then
 		conn = lube.tcpServer()
 		conn.handshake = "helloCardboard"
+		conn:setPing(true, 6, "areYouStillThere?")
 		conn:listen(3410)
 		conn.callbacks.recv = serverRecv
+		conn.callbacks.connect = function() numConnected = numConnected + 1 end
+		conn.callbacks.disconnect = function() numConnected = numConnected - 1 end
 	else
 		local host = args[1]
 		if not host then
@@ -222,6 +207,7 @@ local function prepareNetwork(args)
 		end
 		conn = lube.tcpClient()
 		conn.handshake = "helloCardboard"
+		conn:setPing(true, 2, "areYouStillThere?")
 		assert(conn:connect(host, 3410, true))
 		conn.callbacks.recv = clientRecv
 	end
@@ -327,6 +313,10 @@ function love.draw()
 		love.graphics.rectangle('line', x-1, y-1, 76, 108)
 		love.graphics.setColor(255,255,255,255)
 	end
+
+	if server then
+		love.graphics.print(numConnected .. " clients connected", 10, 10)
+	end
 end
 
 function love.mousepressed(x, y, button)
@@ -346,5 +336,11 @@ function love.mousereleased(x, y, button)
 	if selected then
 		deck[selected]:moved(math.ceil(x-deck[selected].width/2),math.ceil(y-deck[selected].height/2))
 		selected = false
+	end
+end
+
+function love.quit()
+	if not server then
+		conn:disconnect()
 	end
 end
