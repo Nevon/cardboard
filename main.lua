@@ -25,11 +25,11 @@ Card = Class{function(self, id)
 	elseif self.value == 13 then self.name = "King of "..self.suit
 	elseif self.value == 14 then self.name = "Ace of "..self.suit end
 
-	self.image = love.graphics.newImage("images/cards/"..self.suit.."-"..self.value.."-75.png");
+	self.image = love.graphics.newImage("images/cards/"..self.suit.."-"..self.value.."-75.png")
 end}
 
 function Card:draw()
-	love.graphics.draw(self.image, self.x, self.y);
+	love.graphics.draw(self.image, self.x, self.y)
 end
 
 function Card:moved(x,y)
@@ -150,10 +150,10 @@ function love.update(dt)
 end
 
 function love.draw()
-	love.graphics.draw(bg, 0, 0);
+	love.graphics.draw(bg, 0, 0)
 
 	for i,v in ipairs(deck) do
-		v:draw();
+		v:draw()
 	end
 end
 
@@ -168,7 +168,7 @@ end
 
 function love.mousereleased(x, y, button)
 	if selected then
-		deck[selected]:moved(x,y)
+		deck[selected]:moved(math.ceil(x-deck[selected].width/2),math.ceil(y-deck[selected].height/2))
 		selected = false
 	end
 end
