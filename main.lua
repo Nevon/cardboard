@@ -323,7 +323,7 @@ function love.mousepressed(x, y, button)
 	for i,v in ripairs(deck) do
 		if v:clicked(x, y) then
 			if button == 'l' then
-				selected = i
+				selected = v.id
 			elseif button == 'r' then
 				v:flip()
 			end
@@ -334,7 +334,11 @@ end
 
 function love.mousereleased(x, y, button)
 	if selected then
-		deck[selected]:moved(math.ceil(x-deck[selected].width/2),math.ceil(y-deck[selected].height/2))
+		for i,v in ipairs(deck) do
+			if v.id == selected then
+				v:moved(math.ceil(x-v.width/2),math.ceil(y-v.height/2))
+			end
+		end
 		selected = false
 	end
 end
