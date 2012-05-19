@@ -155,6 +155,17 @@ function love.draw()
 	for i,v in ipairs(deck) do
 		v:draw()
 	end
+
+	if selected then
+		x,y = love.mouse.getPosition()
+		x = math.ceil(x-75/2)
+		y = math.ceil(y-107/2)
+		love.graphics.setColor(94,167,214, 177)
+		love.graphics.rectangle('fill', x, y, 75, 107)
+		love.graphics.setColor(157,190,250, 255)
+		love.graphics.rectangle('line', x-1, y-1, 76, 108)
+		love.graphics.setColor(255,255,255,255)
+	end
 end
 
 function love.mousepressed(x, y, button)
