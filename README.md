@@ -7,11 +7,11 @@ That said, it should allow two people to move cards around on a board, flip them
 
 The game is hard coded to use port 3410, and you need [LÖVE](http://love2d.org) to play it. To launch (from within the game directory):
 
-	love .
+	love . [server]
 
 To connect as a client:
 
-	love . <IP adress>
+	love . client <IP adress>
 
 Sounds from here:
 http://www.freesound.org/people/NoiseCollector/sounds/7727/
